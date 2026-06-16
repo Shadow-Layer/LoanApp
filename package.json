@@ -1,0 +1,9 @@
+{
+  "name": "loanap",
+  "private": true,
+  "workspaces": ["packages/backend", "packages/frontend", "packages/shared"],
+  "scripts": {
+    "dev:backend": "npm run dev --workspace=packages/backend",
+    "dev:frontend": "npm run dev --workspace=packages/frontend"
+  }
+}

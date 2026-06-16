@@ -1,0 +1,156 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  loan_officer
+  verifier
+  credit_officer
+  branch_manager
+  admin
+}
+
+enum ApplicationStatus {
+  Submitted
+  VerificationPending
+  VerificationComplete
+  CreditReview
+  Approved
+  Rejected
+  Disbursed
+}
+
+enum NotificationType {
+  APPLICATION_SUBMITTED
+  VERIFICATION_ASSIGNED
+  VERIFICATION_COMPLETED
+  CREDIT_REVIEW_ASSIGNED
+  APPLICATION_APPROVED
+  APPLICATION_REJECTED
+}
+
+model Branch {
+  id           String        @id @default(cuid())
+  name         String
+  region       String        @default("")
+  active       Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  users        User[]
+  applications Application[]
+}
+
+model User {
+  id               String         @id @default(cuid())
+  email            String         @unique
+  passwordHash     String
+  role             UserRole
+  branchId         String
+  branch           Branch         @relation(fields: [branchId], references: [id])
+  active           Boolean        @default(true)
+  refreshTokenHash String?
+  createdAt        DateTime       @default(now())
+  notifications    Notification[]
+  auditEvents      AuditEvent[]
+  assignments      Assignment[]
+}
+
+model Application {
+  id                      String            @id @default(cuid())
+  odkSubmissionId         String?
+  odkFormId               String?
+  status                  ApplicationStatus @default(Submitted)
+  branchId                String
+  branch                  Branch            @relation(fields: [branchId], references: [id])
+  assignedLoanOfficerId   String?
+  assignedVerifierId      String?
+  assignedCreditOfficerId String?
+  draftData               Json?
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+  workflowStates          WorkflowState[]
+  assignments             Assignment[]
+  notifications           Notification[]
+  auditEvents             AuditEvent[]
+  documents               Document[]
+}
+
+model WorkflowState {
+  id              String            @id @default(cuid())
+  applicationId   String
+  application     Application       @relation(fields: [applicationId], references: [id])
+  stage           ApplicationStatus
+  enteredAt       DateTime          @default(now())
+  exitedAt        DateTime?
+  durationSeconds Int?
+}
+
+model Assignment {
+  id            String      @id @default(cuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id])
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  role          UserRole
+  assignedAt    DateTime    @default(now())
+  assignedBy    String?
+}
+
+model Notification {
+  id            String           @id @default(cuid())
+  userId        String
+  user          User             @relation(fields: [userId], references: [id])
+  applicationId String?
+  application   Application?     @relation(fields: [applicationId], references: [id])
+  type          NotificationType
+  message       String
+  read          Boolean          @default(false)
+  createdAt     DateTime         @default(now())
+}
+
+model AuditEvent {
+  id            String       @id @default(cuid())
+  applicationId String?
+  application   Application? @relation(fields: [applicationId], references: [id])
+  userId        String
+  user          User         @relation(fields: [userId], references: [id])
+  action        String
+  previousState String?
+  newState      String?
+  metadata      Json?
+  createdAt     DateTime     @default(now())
+}
+
+model Document {
+  id            String      @id @default(cuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id])
+  filename      String
+  url           String
+  mimeType      String
+  createdAt     DateTime    @default(now())
+}
+
+model WorkflowConfig {
+  id                   Int @id @default(1)
+  slaVerificationHours Int @default(48)
+  slaCreditReviewHours Int @default(24)
+  slaSubmittedHours    Int @default(4)
+}
+
+model BrandingConfig {
+  id           Int      @id @default(1)
+  appName      String   @default("LoanAP")
+  logoUrl      String?
+  faviconUrl   String?
+  primaryColor String   @default("#1A1A1A")
+  accentColor  String   @default("#E8C547")
+  canvasColor  String   @default("#F7F5F0")
+  surfaceColor String   @default("#FFFFFF")
+  updatedAt    DateTime @updatedAt
+  updatedBy    String?
+}
