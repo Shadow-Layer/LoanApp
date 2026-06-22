@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, Box, Button, Card, CardContent, Stack, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, Card, CardContent, Chip, Stack, TextField, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useBranding } from '../context/ThemeContext';
@@ -76,6 +76,16 @@ export function Login(): JSX.Element {
                 <Button type="submit" variant="contained" disabled={loading} sx={{ background: 'var(--color-primary)' }}>
                   {loading ? 'Signing in...' : 'Sign in'}
                 </Button>
+                <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>
+                  Demo mode: use any role email below with password <strong>demo</strong>
+                </Typography>
+                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                  <Chip label="Loan Officer" size="small" clickable onClick={() => setEmail('demo@loanap.local')} />
+                  <Chip label="Verifier" size="small" clickable onClick={() => setEmail('verifier@loanap.local')} />
+                  <Chip label="Credit Officer" size="small" clickable onClick={() => setEmail('credit@loanap.local')} />
+                  <Chip label="Branch Manager" size="small" clickable onClick={() => setEmail('manager@loanap.local')} />
+                  <Chip label="Admin" size="small" clickable onClick={() => setEmail('admin@loanap.local')} />
+                </Stack>
               </Stack>
             </Box>
           </Stack>

@@ -8,6 +8,7 @@ import { NotFoundError } from '../middleware/errorHandler';
 import { OdkService } from '../services/OdkService';
 import { WorkflowService } from '../services/WorkflowService';
 import { canAccessApplication, canPerformTransition } from '../utils/applicationAuthorization';
+import { Prisma } from '@prisma/client';
 
 const router = Router();
 function resolveAssetsDir(): string {
@@ -124,14 +125,14 @@ router.patch('/:id/draft', authMiddleware, requireRole('loan_officer'), async (r
     const application = await prisma.application.upsert({
       where: { id },
       update: {
-        draftData: draftData ?? {},
+      draftData: (draftData ?? {}) as Prisma.InputJsonValue,
         status: 'Submitted',
         branchId: req.user.branchId,
         assignedLoanOfficerId: req.user.userId
       },
       create: {
         id,
-        draftData: draftData ?? {},
+        draftData: (draftData ?? {}) as Prisma.InputJsonValue,
         status: 'Submitted',
         branchId: req.user.branchId,
         assignedLoanOfficerId: req.user.userId

@@ -75,7 +75,7 @@ router.patch('/:id', authMiddleware, requireRole('admin'), async (req, res, next
       branchId?: string;
       active?: boolean;
     };
-    const data: Prisma.UserUpdateInput = {};
+    const data: Prisma.UserUncheckedUpdateInput = {};
     if (email !== undefined) data.email = email;
     if (role !== undefined) data.role = role as never;
     if (branchId !== undefined) data.branchId = branchId;
