@@ -45,4 +45,8 @@ api.interceptors.response.use(
   }
 );
 
+export function isDemoMode(): boolean {
+  return localStorage.getItem('accessToken') === 'demo-access-token';
+}
+
 export default api;

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Box, Card, CardContent, Grid, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
+import { isDemoMode } from '../../api/client';
 import api from '../../api/client';
 import { StatusBadge } from '../../components/StatusBadge';
 
@@ -23,10 +24,23 @@ type Metrics = {
   }>;
 };
 
+const DEMO_METRICS: Metrics = {
+  totalApplications: 42,
+  pendingVerification: 8,
+  pendingApproval: 5,
+  approved: 24,
+  rejected: 5,
+  approvalRate: 83,
+  avgProcessingHours: 18,
+  pipelineCounts: { Submitted: 8, VerificationPending: 8, CreditReview: 5, Approved: 24, Rejected: 5, Disbursed: 12 },
+  bottlenecks: []
+};
+
 export function Dashboard(): JSX.Element {
   const [metrics, setMetrics] = useState<Metrics | null>(null);
 
   const load = async (): Promise<void> => {
+    if (isDemoMode()) { setMetrics(DEMO_METRICS); return; }
     const { data } = await api.get<Metrics>('/metrics/branch');
     setMetrics(data);
   };
