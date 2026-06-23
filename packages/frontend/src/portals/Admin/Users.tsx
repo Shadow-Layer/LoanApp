@@ -19,10 +19,24 @@ import {
   TextField,
   Typography
 } from '@mui/material';
+import { isDemoMode } from '../../api/client';
 import api from '../../api/client';
 
 type Branch = { id: string; name: string; region: string; active: boolean };
 type User = { id: string; email: string; role: string; branchId: string; active: boolean; branch: Branch };
+
+const DEMO_BRANCHES: Branch[] = [
+  { id: 'branch-1', name: 'Main Branch', region: 'Nairobi', active: true },
+  { id: 'branch-2', name: 'West Branch', region: 'Kisumu', active: true }
+];
+
+const DEMO_USERS: User[] = [
+  { id: '00000000-0000-0000-0000-000000000001', email: 'demo@loanap.local', role: 'loan_officer', branchId: 'branch-1', active: true, branch: DEMO_BRANCHES[0] },
+  { id: '00000000-0000-0000-0000-000000000002', email: 'verifier@loanap.local', role: 'verifier', branchId: 'branch-1', active: true, branch: DEMO_BRANCHES[0] },
+  { id: '00000000-0000-0000-0000-000000000003', email: 'credit@loanap.local', role: 'credit_officer', branchId: 'branch-1', active: true, branch: DEMO_BRANCHES[0] },
+  { id: '00000000-0000-0000-0000-000000000004', email: 'manager@loanap.local', role: 'branch_manager', branchId: 'branch-1', active: true, branch: DEMO_BRANCHES[0] },
+  { id: '00000000-0000-0000-0000-000000000005', email: 'admin@loanap.local', role: 'admin', branchId: 'branch-1', active: true, branch: DEMO_BRANCHES[0] }
+];
 
 const emptyForm = { email: '', password: '', role: 'loan_officer', branchId: '' };
 
@@ -35,6 +49,7 @@ export function Users(): JSX.Element {
   const [form, setForm] = useState(emptyForm);
 
   const load = async (): Promise<void> => {
+    if (isDemoMode()) { setUsers(DEMO_USERS); setBranches(DEMO_BRANCHES); return; }
     const [usersResponse, branchesResponse] = await Promise.all([api.get<User[]>('/users'), api.get<Branch[]>('/branches')]);
     setUsers(usersResponse.data);
     setBranches(branchesResponse.data);

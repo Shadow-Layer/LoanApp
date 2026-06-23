@@ -17,9 +17,15 @@ import {
   TextField,
   Typography
 } from '@mui/material';
+import { isDemoMode } from '../../api/client';
 import api from '../../api/client';
 
 type Branch = { id: string; name: string; region: string; active: boolean };
+
+const DEMO_BRANCHES: Branch[] = [
+  { id: 'branch-1', name: 'Main Branch', region: 'Nairobi', active: true },
+  { id: 'branch-2', name: 'West Branch', region: 'Kisumu', active: true }
+];
 
 const emptyForm = { name: '', region: '' };
 
@@ -30,6 +36,7 @@ export function Branches(): JSX.Element {
   const [form, setForm] = useState(emptyForm);
 
   const load = async (): Promise<void> => {
+    if (isDemoMode()) { setBranches(DEMO_BRANCHES); return; }
     const { data } = await api.get<Branch[]>('/branches');
     setBranches(data);
   };

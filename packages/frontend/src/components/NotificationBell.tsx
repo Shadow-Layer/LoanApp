@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Badge, Box, IconButton, List, ListItemButton, ListItemText, Popover, Snackbar, Alert, Typography } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { useNavigate } from 'react-router-dom';
+import { isDemoMode } from '../api/client';
 import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
 
@@ -13,6 +14,25 @@ type Notification = {
   read: boolean;
   createdAt: string;
 };
+
+const DEMO_NOTIFICATIONS: Notification[] = [
+  {
+    id: 'NOTIF-201',
+    applicationId: 'APP-201',
+    type: 'APPLICATION_SUBMITTED',
+    message: 'New application submitted by James Mwangi',
+    read: false,
+    createdAt: '2025-06-20T10:00:00Z'
+  },
+  {
+    id: 'NOTIF-202',
+    applicationId: 'APP-202',
+    type: 'VERIFICATION_COMPLETE',
+    message: 'Verification completed for Grace Wambui',
+    read: false,
+    createdAt: '2025-06-20T08:30:00Z'
+  }
+];
 
 function routeForRole(role: string, applicationId: string | null): string {
   if (!applicationId) {
@@ -44,6 +64,7 @@ export function NotificationBell(): JSX.Element {
   const unreadCount = useMemo(() => notifications.filter((n) => !n.read).length, [notifications]);
 
   const loadNotifications = async (): Promise<void> => {
+    if (isDemoMode()) { setNotifications(DEMO_NOTIFICATIONS); return; }
     const { data } = await api.get<Notification[]>('/notifications');
     setNotifications(data);
   };
@@ -58,7 +79,7 @@ export function NotificationBell(): JSX.Element {
     }, 30000);
 
     const token = localStorage.getItem('accessToken');
-    const source = token ? new EventSource(`/api/notifications/stream?token=${encodeURIComponent(token)}`) : null;
+    const source = (token && !isDemoMode()) ? new EventSource(`/api/notifications/stream?token=${encodeURIComponent(token)}`) : null;
     if (source) {
       const handleNotification = (): void => {
         void loadNotifications().catch(() => undefined);
@@ -86,6 +107,12 @@ export function NotificationBell(): JSX.Element {
   };
 
   const handleNotificationClick = async (notification: Notification): Promise<void> => {
+    if (isDemoMode()) {
+      setNotifications((current) => current.map((item) => (item.id === notification.id ? { ...item, read: true } : item)));
+      navigate(routeForRole(user?.role || 'loan_officer', notification.applicationId));
+      handleClose();
+      return;
+    }
     await api.patch(`/notifications/${notification.id}/read`);
     setNotifications((current) => current.map((item) => (item.id === notification.id ? { ...item, read: true } : item)));
     navigate(routeForRole(user?.role || 'loan_officer', notification.applicationId));

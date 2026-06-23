@@ -10,6 +10,7 @@ import {
   TextField,
   Typography
 } from '@mui/material';
+import { isDemoMode } from '../../api/client';
 import api from '../../api/client';
 import { useBranding } from '../../context/ThemeContext';
 
@@ -77,6 +78,7 @@ export function Branding(): JSX.Element {
   };
 
   const uploadAsset = async (kind: 'logo' | 'favicon', file: File | null): Promise<void> => {
+    if (isDemoMode()) { return; }
     if (!file) {
       return;
     }
@@ -90,6 +92,7 @@ export function Branding(): JSX.Element {
   };
 
   const save = async (): Promise<void> => {
+    if (isDemoMode()) { return; }
     const nextErrors: Record<string, string> = {};
     (['primaryColor', 'accentColor', 'canvasColor', 'surfaceColor'] as const).forEach((field) => {
       if (!hexPattern.test(form[field])) {
@@ -106,6 +109,7 @@ export function Branding(): JSX.Element {
   };
 
   const reset = async (): Promise<void> => {
+    if (isDemoMode()) { return; }
     const { data } = await api.delete<Branding>('/config/branding');
     setForm(data);
     window.dispatchEvent(new Event('branding-updated'));

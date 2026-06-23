@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Box, Button, Card, CardContent, Chip, Grid, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
+import { isDemoMode } from '../../api/client';
 import api from '../../api/client';
 import { StatusBadge } from '../../components/StatusBadge';
 
@@ -14,6 +15,50 @@ type Application = {
   workflowStates: WorkflowState[];
 };
 
+const now = new Date();
+const DEMO_APPLICATIONS: Application[] = [
+  {
+    id: 'VERIFY-001',
+    status: 'VerificationPending',
+    createdAt: '2025-06-20T09:00:00Z',
+    odkFormId: 'form-101',
+    draftData: { applicantName: 'John Kamau' },
+    workflowStates: [{ enteredAt: new Date(now.getTime() - 2 * 3600000).toISOString() }]
+  },
+  {
+    id: 'VERIFY-002',
+    status: 'VerificationPending',
+    createdAt: '2025-06-19T14:30:00Z',
+    odkFormId: 'form-102',
+    draftData: { applicantName: 'Lucy Achieng' },
+    workflowStates: [{ enteredAt: new Date(now.getTime() - 5 * 3600000).toISOString() }]
+  },
+  {
+    id: 'VERIFY-003',
+    status: 'VerificationPending',
+    createdAt: '2025-06-18T11:15:00Z',
+    odkFormId: 'form-103',
+    draftData: { applicantName: 'David Kipchoge' },
+    workflowStates: [{ enteredAt: new Date(now.getTime() - 8 * 3600000).toISOString() }]
+  },
+  {
+    id: 'VERIFY-004',
+    status: 'VerificationPending',
+    createdAt: '2025-06-17T16:45:00Z',
+    odkFormId: 'form-104',
+    draftData: { applicantName: 'Mary Njoki' },
+    workflowStates: [{ enteredAt: new Date(now.getTime() - 12 * 3600000).toISOString() }]
+  },
+  {
+    id: 'VERIFY-005',
+    status: 'VerificationPending',
+    createdAt: '2025-06-16T13:20:00Z',
+    odkFormId: 'form-105',
+    draftData: { applicantName: 'Samuel Kariuki' },
+    workflowStates: [{ enteredAt: new Date(now.getTime() - 1 * 3600000).toISOString() }]
+  }
+];
+
 function applicantName(application: Application): string {
   const name = application.draftData?.applicantName;
   return typeof name === 'string' ? name : application.id;
@@ -23,6 +68,7 @@ export function Queue(): JSX.Element {
   const [applications, setApplications] = useState<Application[]>([]);
 
   useEffect(() => {
+    if (isDemoMode()) { setApplications(DEMO_APPLICATIONS); return; }
     void api.get<Application[]>('/applications').then(({ data }) => setApplications(data));
   }, []);
 

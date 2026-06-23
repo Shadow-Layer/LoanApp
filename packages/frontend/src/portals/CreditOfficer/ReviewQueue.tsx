@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Button, Card, CardContent, Grid, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
+import { isDemoMode } from '../../api/client';
 import api from '../../api/client';
 import { StatusBadge } from '../../components/StatusBadge';
 
@@ -15,10 +16,47 @@ type Application = {
   auditEvents: AuditEvent[];
 };
 
+const now = new Date();
+const DEMO_APPLICATIONS: Application[] = [
+  {
+    id: 'CREDIT-001',
+    status: 'CreditReview',
+    createdAt: '2025-06-15T10:00:00Z',
+    draftData: { applicantName: 'Alice Muthoni', loanAmount: '250000', formId: 'form-201' },
+    workflowStates: [{ enteredAt: new Date(now.getTime() - 3 * 3600000).toISOString() }],
+    auditEvents: [{ action: 'pass', createdAt: new Date(now.getTime() - 24 * 3600000).toISOString() }]
+  },
+  {
+    id: 'CREDIT-002',
+    status: 'CreditReview',
+    createdAt: '2025-06-14T14:30:00Z',
+    draftData: { applicantName: 'Brian Ochieng', loanAmount: '500000', formId: 'form-202' },
+    workflowStates: [{ enteredAt: new Date(now.getTime() - 6 * 3600000).toISOString() }],
+    auditEvents: [{ action: 'pass', createdAt: new Date(now.getTime() - 30 * 3600000).toISOString() }]
+  },
+  {
+    id: 'CREDIT-003',
+    status: 'CreditReview',
+    createdAt: '2025-06-13T09:15:00Z',
+    draftData: { applicantName: 'Catherine Wairimu', loanAmount: '180000', formId: 'form-203' },
+    workflowStates: [{ enteredAt: new Date(now.getTime() - 10 * 3600000).toISOString() }],
+    auditEvents: [{ action: 'pass', createdAt: new Date(now.getTime() - 48 * 3600000).toISOString() }]
+  },
+  {
+    id: 'CREDIT-004',
+    status: 'CreditReview',
+    createdAt: '2025-06-12T16:45:00Z',
+    draftData: { applicantName: 'Daniel Mutua', loanAmount: '750000', formId: 'form-204' },
+    workflowStates: [{ enteredAt: new Date(now.getTime() - 1 * 3600000).toISOString() }],
+    auditEvents: [{ action: 'pass', createdAt: new Date(now.getTime() - 12 * 3600000).toISOString() }]
+  }
+];
+
 export function ReviewQueue(): JSX.Element {
   const [applications, setApplications] = useState<Application[]>([]);
 
   useEffect(() => {
+    if (isDemoMode()) { setApplications(DEMO_APPLICATIONS); return; }
     void api.get<Application[]>('/applications').then(({ data }) => setApplications(data));
   }, []);
 

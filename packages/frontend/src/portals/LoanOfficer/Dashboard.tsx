@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Box, Button, Card, CardContent, Grid, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
+import { isDemoMode } from '../../api/client';
 import api from '../../api/client';
 import { StatusBadge } from '../../components/StatusBadge';
 
@@ -13,6 +14,41 @@ type Application = {
   draftData: Record<string, unknown> | null;
 };
 
+const DEMO_APPLICATIONS: Application[] = [
+  {
+    id: 'LOAN-001',
+    status: 'Submitted',
+    createdAt: '2025-06-15T10:30:00Z',
+    odkFormId: 'form-001',
+    odkSubmissionId: 'sub-001',
+    draftData: { applicantName: 'James Mwangi' }
+  },
+  {
+    id: 'LOAN-002',
+    status: 'VerificationPending',
+    createdAt: '2025-06-18T14:20:00Z',
+    odkFormId: 'form-002',
+    odkSubmissionId: 'sub-002',
+    draftData: { applicantName: 'Grace Wambui' }
+  },
+  {
+    id: 'LOAN-003',
+    status: 'CreditReview',
+    createdAt: '2025-06-10T08:45:00Z',
+    odkFormId: 'form-003',
+    odkSubmissionId: 'sub-003',
+    draftData: { applicantName: 'Peter Otieno' }
+  },
+  {
+    id: 'LOAN-004',
+    status: 'Approved',
+    createdAt: '2025-06-05T11:00:00Z',
+    odkFormId: 'form-004',
+    odkSubmissionId: 'sub-004',
+    draftData: { applicantName: 'Sarah Njeri' }
+  }
+];
+
 function getApplicantName(application: Application): string {
   const value = application.draftData?.applicantName;
   return typeof value === 'string' && value ? value : application.odkSubmissionId || application.id;
@@ -23,6 +59,7 @@ export function Dashboard(): JSX.Element {
   const [applications, setApplications] = useState<Application[]>([]);
 
   useEffect(() => {
+    if (isDemoMode()) { setApplications(DEMO_APPLICATIONS); return; }
     void api.get<Application[]>('/applications?assignedTo=me').then(({ data }) => setApplications(data));
   }, []);
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Card, CardContent, Stack, TextField, Typography } from '@mui/material';
+import { isDemoMode } from '../../api/client';
 import api from '../../api/client';
 
 type WorkflowConfig = {
@@ -16,10 +17,13 @@ export function WorkflowConfig(): JSX.Element {
   });
 
   useEffect(() => {
-    void api.get<WorkflowConfig>('/config/workflow').then(({ data }) => setConfig(data));
+    if (!isDemoMode()) {
+      void api.get<WorkflowConfig>('/config/workflow').then(({ data }) => setConfig(data));
+    }
   }, []);
 
   const save = async (): Promise<void> => {
+    if (isDemoMode()) { return; }
     const { data } = await api.patch<WorkflowConfig>('/config/workflow', config);
     setConfig(data);
   };
